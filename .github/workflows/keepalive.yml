@@ -1,0 +1,17 @@
+name: Keep alive
+# Render free plan sleeps after 15 min of idle. Each run pings /healthz every 30s for ~9 min;
+# runs start every 5 min, so consecutive runs overlap and a delayed/skipped run is covered.
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - run: |
+          for i in $(seq 1 18); do
+            curl -sS --max-time 60 -o /dev/null -w "%{http_code}\n" https://darklulu.onrender.com/healthz || true
+            sleep 30
+          done
